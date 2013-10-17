@@ -1972,7 +1972,7 @@ STAGE PLANS:
                       type: double
                       expr: _col2
                       type: string
-                sort order: ++++
+                sort order: +++
                 Map-reduce partition columns:
                       expr: _col0
                       type: string

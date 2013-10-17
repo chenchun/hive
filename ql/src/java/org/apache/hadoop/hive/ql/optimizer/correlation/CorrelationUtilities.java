@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.ql.exec.ColumnInfo;
 import org.apache.hadoop.hive.ql.exec.ExtractOperator;
 import org.apache.hadoop.hive.ql.exec.FilterOperator;
@@ -41,18 +42,22 @@ import org.apache.hadoop.hive.ql.exec.ScriptOperator;
 import org.apache.hadoop.hive.ql.exec.SelectOperator;
 import org.apache.hadoop.hive.ql.exec.TableScanOperator;
 import org.apache.hadoop.hive.ql.exec.Utilities;
+import static org.apache.hadoop.hive.ql.exec.Utilities.ReduceField;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.parse.OpParseContext;
 import org.apache.hadoop.hive.ql.parse.ParseContext;
 import org.apache.hadoop.hive.ql.parse.RowResolver;
 import org.apache.hadoop.hive.ql.parse.SemanticException;
 import org.apache.hadoop.hive.ql.plan.AggregationDesc;
+import org.apache.hadoop.hive.ql.plan.ExprNodeColumnDesc;
 import org.apache.hadoop.hive.ql.plan.ExprNodeDesc;
 import org.apache.hadoop.hive.ql.plan.ExprNodeDescUtils;
 import org.apache.hadoop.hive.ql.plan.GroupByDesc;
 import org.apache.hadoop.hive.ql.plan.JoinCondDesc;
 import org.apache.hadoop.hive.ql.plan.JoinDesc;
 import org.apache.hadoop.hive.ql.plan.OperatorDesc;
+import org.apache.hadoop.hive.ql.plan.PlanUtils;
+import org.apache.hadoop.hive.ql.plan.ReduceSinkDesc;
 import org.apache.hadoop.hive.ql.plan.SelectDesc;
 import org.apache.hadoop.hive.ql.udf.generic.GenericUDAFEvaluator;
 
@@ -490,4 +495,137 @@ public final class CorrelationUtilities {
     context.getOpParseCtx().put(op, ctx);
     return op;
   }
+
+  /**
+   * Replace keyCols of pRS with keyCols of cRS, for those keyCols of pRS which not in cRS
+   * move them to the valCols of pRS
+   * @param pRS
+   * @param cRS
+   * @throws SemanticException
+   */
+  public static void replace(ReduceSinkOperator pRS, ReduceSinkOperator cRS, ParseContext context)
+      throws SemanticException {
+    ReduceSinkDesc pRSConf = pRS.getConf(), cRSConf = cRS.getConf();
+    ArrayList<ExprNodeDesc> oldKeyExprs = pRSConf.getKeyCols(), valExprs = pRSConf.getValueCols();
+    Map<ExprNodeDesc.ExprNodeDescEqualityWrapper, Integer> oldKeyExprMap = new
+        HashMap<ExprNodeDesc.ExprNodeDescEqualityWrapper, Integer> ();
+    Map<ExprNodeDesc.ExprNodeDescEqualityWrapper, Integer> oldValExprMap = new
+        HashMap<ExprNodeDesc.ExprNodeDescEqualityWrapper, Integer>();
+    // cols need to be changed, key=oldKeyPos value=[newPos, key/value]
+    Map<Integer, Object[]> change = new HashMap<Integer, Object[]>();
+    Map<String, String> colNameChangeMap = new HashMap<String, String>();
+    ArrayList<ExprNodeDesc> keyExprs = new ArrayList<ExprNodeDesc>();
+    String newOrder = "";
+    for (int i = 0; i < cRSConf.getKeyCols().size(); i++) {
+      ExprNodeDesc keyExpr = ExprNodeDescUtils.backtrack(cRSConf.getKeyCols().get(i), cRS, pRS);
+      if (keyExpr != null) {
+        keyExprs.add(keyExpr);
+        newOrder += cRSConf.getOrder().charAt(i);
+      }
+    }
+    // newRR consists of three parts: newKeyCol, oldValueCol, newValueCol
+    RowResolver newRR = new RowResolver(), oldpRSRR = context.getOpParseCtx().get(pRS)
+        .getRowResolver();
+    ArrayList<ColumnInfo> oldColumnInfos = oldpRSRR.getColumnInfos();
+    for (int pos = 0; pos < oldKeyExprs.size(); pos++) {
+      oldKeyExprMap.put(new ExprNodeDesc.ExprNodeDescEqualityWrapper(oldKeyExprs.get(pos)), pos);
+      change.put(pos, new Object[]{null, ReduceField.VALUE});
+    }
+    for (int i = 0; i < valExprs.size(); i++) {
+      oldValExprMap.put(new ExprNodeDesc.ExprNodeDescEqualityWrapper(valExprs.get(i)), i);
+    }
+    for (int i = 0; i < keyExprs.size(); i++) {
+      ExprNodeDesc.ExprNodeDescEqualityWrapper exprWrapper = new ExprNodeDesc
+          .ExprNodeDescEqualityWrapper(keyExprs.get(i));
+      if (oldKeyExprMap.containsKey(exprWrapper)) {
+        Integer keyPos = oldKeyExprMap.get(exprWrapper);
+        if (i == keyPos) {
+          change.remove(oldKeyExprMap.get(exprWrapper));
+          oldKeyExprMap.remove(exprWrapper);
+          addColumnInfo(newRR, oldpRSRR, oldColumnInfos.get(keyPos).getInternalName());
+        } else {
+          Object[] newCol = change.get(keyPos);
+          newCol[0] = i;
+          newCol[1] = ReduceField.KEY;
+          addColumnInfo(newRR, oldpRSRR, oldColumnInfos.get(keyPos).getInternalName(),
+              Utilities.getColumnInternalName(ReduceField.KEY, i));
+        }
+      }
+    }
+    addColumnInfo(newRR, oldpRSRR, oldColumnInfos.subList(oldKeyExprs.size(),
+        oldColumnInfos.size()));
+    for (Map.Entry<Integer, Object[]> entry : change.entrySet()) {
+      Integer keyPos = entry.getKey();
+      String oldKeyOutPutName = oldColumnInfos.get(keyPos).getInternalName();
+      Object[] newCol = entry.getValue();
+      ExprNodeDesc oldRSExpr = pRS.getColumnExprMap().get(oldColumnInfos.get(keyPos)
+          .getInternalName());
+      if (newCol[1] == ReduceField.VALUE) {
+        ExprNodeDesc.ExprNodeDescEqualityWrapper exprWrapper = new ExprNodeDesc
+            .ExprNodeDescEqualityWrapper(oldRSExpr);
+        if (!oldValExprMap.containsKey(exprWrapper)) {
+          addColumnInfo(newRR, oldpRSRR, oldKeyOutPutName, Utilities.getColumnInternalName
+              (ReduceField.VALUE, valExprs.size()));
+          newCol[0] = valExprs.size();
+          valExprs.add(oldRSExpr);
+        } else {
+          newCol[0] = oldValExprMap.get(exprWrapper);
+        }
+      }
+      colNameChangeMap.put(oldKeyOutPutName, Utilities.getColumnInternalName((ReduceField)
+          newCol[1], (Integer) newCol[0]));
+    }
+    pRS.setSchema(new RowSchema(newRR.getColumnInfos()));
+    context.getOpParseCtx().get(pRS).setRowResolver(newRR);
+    pRS.setConf(PlanUtils.getReduceSinkDesc(keyExprs, valExprs, pRSConf.isIncludeKeyCols() ?
+        HiveConf.getColumnInternalNames(keyExprs.size(), valExprs.size()) : HiveConf
+        .getColumnInternalNames(valExprs.size()), pRSConf.isIncludeKeyCols(), pRSConf.getTag(),
+        pRSConf.getPartitionCols(), newOrder, pRSConf.getNumReducers()));
+    PlanUtils.genReduceSinkExprMap(pRS);
+    for (Operator<?> cOp : pRS.getChildOperators()) {
+      if (cOp instanceof GroupByOperator) {
+        GroupByDesc conf = ((GroupByOperator) cOp).getConf();
+        ExprNodeDescUtils.replaceColumnName(conf.getKeys(), colNameChangeMap);
+        for (AggregationDesc aggregationDesc : conf.getAggregators()) {
+          ExprNodeDescUtils.replaceColumnName(aggregationDesc.getParameters(), colNameChangeMap);
+        }
+      }
+      Map<String, ExprNodeDesc> newColExprMap = new HashMap<String, ExprNodeDesc>();
+      if (cOp.getColumnExprMap() != null) {
+        for (Map.Entry<String, ExprNodeDesc> entry : cOp.getColumnExprMap().entrySet()) {
+          ExprNodeColumnDesc expr = (ExprNodeColumnDesc) entry.getValue();
+          if (colNameChangeMap.containsKey(expr.getExprString())) {
+            newColExprMap.put(entry.getKey(), new ExprNodeColumnDesc(expr.getTypeInfo(),
+                colNameChangeMap.get(expr.getExprString()), expr.getTabAlias(),
+                expr.isSkewedCol()));
+          } else {
+            newColExprMap.put(entry.getKey(), entry.getValue());
+          }
+        }
+      }
+      cOp.setColumnExprMap(newColExprMap);
+    }
+  }
+
+  public static void addColumnInfo(RowResolver newRR, RowResolver oldRR, List<ColumnInfo> colInfos)
+      throws SemanticException {
+    for (ColumnInfo col : colInfos) {
+      addColumnInfo(newRR, oldRR, col.getInternalName());
+    }
+  }
+
+  public static void addColumnInfo(RowResolver newRR, RowResolver oldRR, String colName) throws
+      SemanticException {
+    addColumnInfo(newRR, oldRR, colName, colName);
+  }
+
+  public static void addColumnInfo(RowResolver newRR, RowResolver oldRR, String colName,
+      String newColName) throws SemanticException {
+    String[] nm = oldRR.reverseLookup(colName);
+    ColumnInfo colInfo = oldRR.get(nm[0], nm[1]);
+    ColumnInfo newColInfo = new ColumnInfo(newColName, colInfo.getObjectInspector(),
+        colInfo.getTabAlias(), colInfo.getIsVirtualCol(), colInfo.isHiddenVirtualCol());
+    newRR.put(nm[0], nm[1], newColInfo);
+  }
+
 }

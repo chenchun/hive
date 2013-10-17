@@ -21,6 +21,7 @@ package org.apache.hadoop.hive.ql.plan;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.MetaStoreUtils;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.ql.exec.ColumnInfo;
+import org.apache.hadoop.hive.ql.exec.ReduceSinkOperator;
 import org.apache.hadoop.hive.ql.exec.RowSchema;
 import org.apache.hadoop.hive.ql.exec.Utilities;
 import org.apache.hadoop.hive.ql.hooks.ReadEntity;
@@ -622,7 +624,7 @@ public final class PlanUtils {
         valueCols, outputValueColumnNames, 0, ""));
     outputValCols.addAll(outputValueColumnNames);
     return new ReduceSinkDesc(keyCols, numKeys, valueCols, outputKeyCols,
-        distinctColIndices, outputValCols,
+        distinctColIndices, outputValCols, includeKeyCols,
         tag, partitionCols, numReducers, keyTable,
         valueTable);
   }
@@ -872,5 +874,25 @@ public final class PlanUtils {
     }
     // make compile happy
     return null;
+  }
+
+  public static void genReduceSinkExprMap(ReduceSinkOperator rs) {
+    ReduceSinkDesc conf = rs.getConf();
+    Map<String, ExprNodeDesc> exprMap = new HashMap<String, ExprNodeDesc>();
+    if (rs.getConf().isIncludeKeyCols()) {
+      for (int i = 0; i < conf.getKeyCols().size(); i++) {
+        exprMap.put(Utilities.getColumnInternalName(Utilities.ReduceField.KEY, i),
+            conf.getKeyCols().get(i));
+      }
+      for (int i = 0; i < conf.getValueCols().size(); i++) {
+        exprMap.put(Utilities.getColumnInternalName(Utilities.ReduceField.VALUE, i),
+            conf.getValueCols().get(i));
+      }
+    } else {
+      for (int i = 0; i < conf.getValueCols().size(); i++) {
+        exprMap.put(HiveConf.getColumnInternalName(i), conf.getValueCols().get(i));
+      }
+    }
+    rs.setColumnExprMap(exprMap);
   }
 }

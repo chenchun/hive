@@ -1279,6 +1279,16 @@ public class HiveConf extends Configuration {
     return "_col" + pos;
   }
 
+  public static ArrayList<String> getColumnInternalNames(int...colNums) {
+    ArrayList<String> outPutColumnNames = new ArrayList<String>();
+    for (int i = 0; i < colNums.length; i++) {
+      for (int j = 0; j < colNums[i]; j++) {
+        outPutColumnNames.add(getColumnInternalName(j));
+      }
+    }
+    return outPutColumnNames;
+  }
+
   public static int getPositionFromInternalName(String internalName) {
     Pattern internalPattern = Pattern.compile("_col([0-9]+)");
     Matcher m = internalPattern.matcher(internalName);

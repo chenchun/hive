@@ -72,6 +72,8 @@ public class ReduceSinkDesc extends AbstractOperatorDesc {
   private float topNMemoryUsage = -1;
   private boolean mapGroupBy;  // for group-by, values with same key on top-K should be forwarded
 
+  private boolean includeKeyCols;
+
   public ReduceSinkDesc() {
   }
 
@@ -80,7 +82,8 @@ public class ReduceSinkDesc extends AbstractOperatorDesc {
       ArrayList<ExprNodeDesc> valueCols,
       ArrayList<String> outputKeyColumnNames,
       List<List<Integer>> distinctColumnIndices,
-      ArrayList<String> outputValueColumnNames, int tag,
+      ArrayList<String> outputValueColumnNames,
+      boolean includeKeyCols, int tag,
       ArrayList<ExprNodeDesc> partitionCols, int numReducers,
       final TableDesc keySerializeInfo, final TableDesc valueSerializeInfo) {
     this.keyCols = keyCols;
@@ -88,6 +91,7 @@ public class ReduceSinkDesc extends AbstractOperatorDesc {
     this.valueCols = valueCols;
     this.outputKeyColumnNames = outputKeyColumnNames;
     this.outputValueColumnNames = outputValueColumnNames;
+    this.includeKeyCols = includeKeyCols;
     this.tag = tag;
     this.numReducers = numReducers;
     this.partitionCols = partitionCols;
@@ -272,5 +276,13 @@ public class ReduceSinkDesc extends AbstractOperatorDesc {
   public void setDistinctColumnIndices(
       List<List<Integer>> distinctColumnIndices) {
     this.distinctColumnIndices = distinctColumnIndices;
+  }
+
+  public boolean isIncludeKeyCols() {
+    return includeKeyCols;
+  }
+
+  public void setIncludeKeyCols(boolean includeKeyCols) {
+    this.includeKeyCols = includeKeyCols;
   }
 }

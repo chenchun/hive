@@ -5864,6 +5864,8 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
             Utilities.ReduceField.VALUE.toString(), "", false)), new RowSchema(
             out_rwsch.getColumnInfos()), interim), out_rwsch);
 
+    output.setColumnExprMap(colExprMap);
+
     if (LOG.isDebugEnabled()) {
       LOG.debug("Created ReduceSink Plan for clause: " + dest + " row schema: "
           + out_rwsch.toString());

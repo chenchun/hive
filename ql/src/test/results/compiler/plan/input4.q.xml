@@ -316,7 +316,7 @@
                       <void method="add"> 
                        <object id="ReduceSinkOperator0" class="org.apache.hadoop.hive.ql.exec.ReduceSinkOperator"> 
                         <void property="columnExprMap"> 
-                         <object class="java.util.HashMap"> 
+                         <object id="HashMap0" class="java.util.HashMap"> 
                           <void method="put"> 
                            <string>_col1</string> 
                            <object id="ExprNodeColumnDesc0" class="org.apache.hadoop.hive.ql.plan.ExprNodeColumnDesc"> 
@@ -1456,6 +1456,9 @@
            </object> 
           </void> 
          </object> 
+        </void> 
+        <void property="columnExprMap"> 
+         <object idref="HashMap0"/> 
         </void> 
         <void property="conf"> 
          <object class="org.apache.hadoop.hive.ql.plan.ExtractDesc"> 

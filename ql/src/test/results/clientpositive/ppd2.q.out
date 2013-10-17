@@ -60,9 +60,7 @@ STAGE PLANS:
                   key expressions:
                         expr: _col0
                         type: string
-                        expr: _col1
-                        type: bigint
-                  sort order: +-
+                  sort order: +
                   Map-reduce partition columns:
                         expr: _col0
                         type: string
@@ -532,9 +530,7 @@ STAGE PLANS:
                     key expressions:
                           expr: _col0
                           type: string
-                          expr: _col1
-                          type: bigint
-                    sort order: +-
+                    sort order: +
                     Map-reduce partition columns:
                           expr: _col0
                           type: string

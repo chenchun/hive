@@ -21,6 +21,7 @@ package org.apache.hadoop.hive.ql.plan;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 
@@ -83,5 +84,18 @@ public class ExprNodeColumnListDesc extends ExprNodeDesc {
   @Override
   public List<ExprNodeDesc> getChildren() {
     return new ArrayList<ExprNodeDesc>(columns);
+  }
+
+  public void setCols(List<ExprNodeColumnDesc> cols) {
+    this.columns = cols;
+  }
+
+  @Override
+  public int hashCode() {
+    int superHashCode = super.hashCode();
+    HashCodeBuilder builder = new HashCodeBuilder();
+    builder.appendSuper(superHashCode);
+    builder.append(columns);
+    return builder.toHashCode();
   }
 }

@@ -3065,5 +3065,9 @@ public final class Utilities {
       }
     }
   }
+
+  public static String getColumnInternalName(ReduceField field, int pos) {
+    return field.toString() + "." + HiveConf.getColumnInternalName(pos);
+  }
 }
 

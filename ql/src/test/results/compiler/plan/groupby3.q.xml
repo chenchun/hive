@@ -298,6 +298,9 @@
                         </void> 
                        </object> 
                       </void> 
+                      <void property="includeKeyCols"> 
+                       <boolean>true</boolean> 
+                      </void> 
                       <void property="keyCols"> 
                        <object class="java.util.ArrayList"> 
                         <void method="add"> 

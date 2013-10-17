@@ -182,7 +182,10 @@ public class ExprNodeDescUtils {
       Operator<?> current, Operator<?> terminal) throws SemanticException {
     ArrayList<ExprNodeDesc> result = new ArrayList<ExprNodeDesc>();
     for (ExprNodeDesc expr : sources) {
-      result.add(backtrack(expr, current, terminal));
+      ExprNodeDesc exprNodeDesc = backtrack(expr, current, terminal);
+      if (exprNodeDesc != null) {
+        result.add(exprNodeDesc);
+      }
     }
     return result;
   }
@@ -218,7 +221,7 @@ public class ExprNodeDescUtils {
       Operator<?> terminal) throws SemanticException {
     Map<String, ExprNodeDesc> mapping = current.getColumnExprMap();
     if (mapping == null || !mapping.containsKey(column.getColumn())) {
-      return backtrack((ExprNodeDesc)column, current, terminal);
+      return null;
     }
     ExprNodeDesc mapped = mapping.get(column.getColumn());
     return backtrack(mapped, current, terminal);
@@ -244,4 +247,49 @@ public class ExprNodeDescUtils {
     }
     throw new SemanticException("Met multiple parent operators");
   }
+
+  public static void replaceColumnName(ArrayList<ExprNodeDesc> targets, Map<String, String>
+      old2newNameMap) {
+    for (int i = 0; i < targets.size(); i++) {
+      targets.set(i, replaceColumnName(targets.get(i), old2newNameMap));
+    }
+  }
+
+  /**
+   * Change col name
+   *
+   * @param expr
+   * @param old2newNameMap
+   * @return
+   */
+  public static ExprNodeDesc replaceColumnName(ExprNodeDesc expr, Map<String,
+      String> old2newNameMap) {
+    if (expr instanceof ExprNodeColumnDesc) {
+      ExprNodeColumnDesc exprNodeColumnDesc = (ExprNodeColumnDesc) expr;
+      if (old2newNameMap.containsKey(exprNodeColumnDesc.getColumn())) {
+        return new ExprNodeColumnDesc(exprNodeColumnDesc.getTypeInfo(),
+            old2newNameMap.get(exprNodeColumnDesc.getColumn()),exprNodeColumnDesc.getTabAlias(),
+            exprNodeColumnDesc.getIsPartitionColOrVirtualCol(), exprNodeColumnDesc.isSkewedCol());
+      }
+    } else if (expr instanceof ExprNodeFieldDesc) {
+      ExprNodeFieldDesc exprNodeFieldDesc = (ExprNodeFieldDesc) expr;
+      exprNodeFieldDesc.setDesc(replaceColumnName(exprNodeFieldDesc.getDesc(), old2newNameMap));
+    } else if (expr instanceof ExprNodeGenericFuncDesc) {
+      ExprNodeGenericFuncDesc genericFuncDesc = (ExprNodeGenericFuncDesc) expr;
+      List<ExprNodeDesc> newChildExprs = new ArrayList<ExprNodeDesc>();
+      for (ExprNodeDesc childExpr : genericFuncDesc.getChildExprs()) {
+        newChildExprs.add(replaceColumnName(childExpr, old2newNameMap));
+      }
+      genericFuncDesc.setChildExprs(newChildExprs);
+    } else if (expr instanceof ExprNodeColumnListDesc) {
+      ExprNodeColumnListDesc exprNodeColumnListDesc = (ExprNodeColumnListDesc) expr;
+      List<ExprNodeColumnDesc> newCols = new ArrayList<ExprNodeColumnDesc>();
+      for (ExprNodeDesc exprNodeDesc : exprNodeColumnListDesc.getChildren()) {
+        newCols.add((ExprNodeColumnDesc) replaceColumnName(exprNodeDesc, old2newNameMap));
+      }
+      exprNodeColumnListDesc.setCols(newCols);
+    }
+    return expr;
+  }
+
 }
