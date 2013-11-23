@@ -334,7 +334,12 @@ public class ReduceSinkOperator extends TerminalOperator<ReduceSinkDesc>
 
         if (reducerHash == null) {
           if (null != out) {
-            collect(keyWritable, value = getValue(row, value));
+            if (numDistinctExprs > 0 && i > 0) {
+              collect(keyWritable, new BytesWritable());
+            } else {
+              collect(keyWritable, value = getValue(row, value));
+            }
+
           }
        } else {
           int index = reducerHash.indexOf(keyWritable);
