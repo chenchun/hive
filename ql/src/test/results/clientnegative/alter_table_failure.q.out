@@ -1,0 +1,10 @@
+PREHOOK: query: create table alter6 (a int)
+PREHOOK: type: CREATETABLE
+POSTHOOK: query: create table alter6 (a int)
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: default@alter6
+PREHOOK: query: create database alter_db
+PREHOOK: type: CREATEDATABASE
+POSTHOOK: query: create database alter_db
+POSTHOOK: type: CREATEDATABASE
+FAILED: ParseException line 2:45 missing EOF at '.' near 'alter_db' in ddl statement

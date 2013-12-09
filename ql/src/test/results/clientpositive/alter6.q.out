@@ -1,0 +1,454 @@
+PREHOOK: query: create table default_alter6 (a int) partitioned by (p string)
+PREHOOK: type: CREATETABLE
+POSTHOOK: query: create table default_alter6 (a int) partitioned by (p string)
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: default@default_alter6
+PREHOOK: query: alter table default.default_alter6 rename to alter6
+PREHOOK: type: ALTERTABLE_RENAME
+PREHOOK: Input: default@default_alter6
+PREHOOK: Output: default@default_alter6
+POSTHOOK: query: alter table default.default_alter6 rename to alter6
+POSTHOOK: type: ALTERTABLE_RENAME
+POSTHOOK: Input: default@default_alter6
+POSTHOOK: Output: default@alter6
+POSTHOOK: Output: default@default_alter6
+PREHOOK: query: describe default.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe default.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+PREHOOK: query: alter table default.alter6 add columns (b int)
+PREHOOK: type: ALTERTABLE_ADDCOLS
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: alter table default.alter6 add columns (b int)
+POSTHOOK: type: ALTERTABLE_ADDCOLS
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe default.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe default.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+PREHOOK: query: alter table default.alter6 replace columns (a int, b int, c string)
+PREHOOK: type: ALTERTABLE_REPLACECOLS
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: alter table default.alter6 replace columns (a int, b int, c string)
+POSTHOOK: type: ALTERTABLE_REPLACECOLS
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe default.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe default.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+c                   	string              	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+PREHOOK: query: alter table default.alter6 change column c cc int
+PREHOOK: type: ALTERTABLE_RENAMECOL
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: alter table default.alter6 change column c cc int
+POSTHOOK: type: ALTERTABLE_RENAMECOL
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe default.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe default.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+PREHOOK: query: alter table default.alter6 add partition (p='p1')
+PREHOOK: type: ALTERTABLE_ADDPARTS
+PREHOOK: Input: default@alter6
+POSTHOOK: query: alter table default.alter6 add partition (p='p1')
+POSTHOOK: type: ALTERTABLE_ADDPARTS
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6@p=p1
+PREHOOK: query: alter table default.alter6 add partition (p='p2')
+PREHOOK: type: ALTERTABLE_ADDPARTS
+PREHOOK: Input: default@alter6
+POSTHOOK: query: alter table default.alter6 add partition (p='p2')
+POSTHOOK: type: ALTERTABLE_ADDPARTS
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6@p=p2
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+p=p1
+p=p2
+PREHOOK: query: alter table default.alter6 touch partition(p='p1')
+PREHOOK: type: ALTERTABLE_TOUCH
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6@p=p1
+POSTHOOK: query: alter table default.alter6 touch partition(p='p1')
+POSTHOOK: type: ALTERTABLE_TOUCH
+POSTHOOK: Input: default@alter6
+POSTHOOK: Input: default@alter6@p=p1
+POSTHOOK: Output: default@alter6@p=p1
+PREHOOK: query: alter table default.alter6 archive partition (p='p1')
+PREHOOK: type: ALTERTABLE_ARCHIVE
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6@p=p1
+POSTHOOK: query: alter table default.alter6 archive partition (p='p1')
+POSTHOOK: type: ALTERTABLE_ARCHIVE
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6@p=p1
+PREHOOK: query: describe extended alter6 partition (p='p1')
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe extended alter6 partition (p='p1')
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+	 	 
+#### A masked pattern was here ####
+PREHOOK: query: alter table default.alter6 unarchive partition (p='p1')
+PREHOOK: type: ALTERTABLE_UNARCHIVE
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6@p=p1
+POSTHOOK: query: alter table default.alter6 unarchive partition (p='p1')
+POSTHOOK: type: ALTERTABLE_UNARCHIVE
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6@p=p1
+PREHOOK: query: describe extended alter6 partition (p='p1')
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe extended alter6 partition (p='p1')
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+	 	 
+#### A masked pattern was here ####
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+p=p1
+p=p2
+PREHOOK: query: alter table default.alter6 drop partition (p='p1')
+PREHOOK: type: ALTERTABLE_DROPPARTS
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6@p=p1
+POSTHOOK: query: alter table default.alter6 drop partition (p='p1')
+POSTHOOK: type: ALTERTABLE_DROPPARTS
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6@p=p1
+PREHOOK: query: alter table default.alter6 set tblproperties('s1'='1')
+PREHOOK: type: ALTERTABLE_PROPERTIES
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: alter table default.alter6 set tblproperties('s1'='1')
+POSTHOOK: type: ALTERTABLE_PROPERTIES
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe extended alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe extended alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+	 	 
+#### A masked pattern was here ####
+PREHOOK: query: alter table default.alter6 unset tblproperties('s1'='1')
+PREHOOK: type: ALTERTABLE_PROPERTIES
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: alter table default.alter6 unset tblproperties('s1'='1')
+POSTHOOK: type: ALTERTABLE_PROPERTIES
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe extended alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe extended alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+	 	 
+#### A masked pattern was here ####
+PREHOOK: query: alter table default.alter6 partition (p='p2') set fileformat orc
+PREHOOK: type: ALTERPARTITION_FILEFORMAT
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6@p=p2
+POSTHOOK: query: alter table default.alter6 partition (p='p2') set fileformat orc
+POSTHOOK: type: ALTERPARTITION_FILEFORMAT
+POSTHOOK: Input: default@alter6
+POSTHOOK: Input: default@alter6@p=p2
+POSTHOOK: Output: default@alter6@p=p2
+PREHOOK: query: show create table alter6
+PREHOOK: type: SHOW_CREATETABLE
+PREHOOK: Input: default@alter6
+POSTHOOK: query: show create table alter6
+POSTHOOK: type: SHOW_CREATETABLE
+POSTHOOK: Input: default@alter6
+CREATE  TABLE `alter6`(
+  `a` int, 
+  `b` int, 
+  `cc` int)
+PARTITIONED BY ( 
+  `p` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+#### A masked pattern was here ####
+TBLPROPERTIES (
+#### A masked pattern was here ####
+PREHOOK: query: alter table default.alter6 partition column (p int)
+PREHOOK: type: null
+PREHOOK: Input: default@alter6
+POSTHOOK: query: alter table default.alter6 partition column (p int)
+POSTHOOK: type: null
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe default.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe default.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	int                 	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	int                 	None                
+PREHOOK: query: create table exchange_alter6 like alter6
+PREHOOK: type: CREATETABLE
+POSTHOOK: query: create table exchange_alter6 like alter6
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: default@exchange_alter6
+PREHOOK: query: show partitions exchange_alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions exchange_alter6
+POSTHOOK: type: SHOWPARTITIONS
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+p=p2
+PREHOOK: query: alter table default.alter6 exchange partition (p='p2') with table exchange_alter6
+PREHOOK: type: null
+POSTHOOK: query: alter table default.alter6 exchange partition (p='p2') with table exchange_alter6
+POSTHOOK: type: null
+PREHOOK: query: show partitions exchange_alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions exchange_alter6
+POSTHOOK: type: SHOWPARTITIONS
+p=p2
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+PREHOOK: query: drop table exchange_alter6
+PREHOOK: type: DROPTABLE
+PREHOOK: Input: default@exchange_alter6
+PREHOOK: Output: default@exchange_alter6
+POSTHOOK: query: drop table exchange_alter6
+POSTHOOK: type: DROPTABLE
+POSTHOOK: Input: default@exchange_alter6
+POSTHOOK: Output: default@exchange_alter6
+PREHOOK: query: alter table default.alter6 skewed by (a) on ('skew_a') stored as directories
+PREHOOK: type: ALTERTABLE_SKEWED
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: alter table default.alter6 skewed by (a) on ('skew_a') stored as directories
+POSTHOOK: type: ALTERTABLE_SKEWED
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe formatted alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe formatted alter6
+POSTHOOK: type: DESCTABLE
+# col_name            	data_type           	comment             
+	 	 
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	int                 	None                
+	 	 
+# Detailed Table Information	 	 
+Database:           	default             	 
+#### A masked pattern was here ####
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+#### A masked pattern was here ####
+Table Type:         	MANAGED_TABLE       	 
+Table Parameters:	 	 
+#### A masked pattern was here ####
+	 	 
+# Storage Information	 	 
+SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Stored As SubDirectories:	Yes                 	 
+Skewed Columns:     	[a]                 	 
+Skewed Values:      	[[skew_a]]          	 
+Storage Desc Params:	 	 
+	serialization.format	1                   
+PREHOOK: query: alter table default.alter6 not stored as directories
+PREHOOK: type: ALTERTABLE_SKEWED
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: alter table default.alter6 not stored as directories
+POSTHOOK: type: ALTERTABLE_SKEWED
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe formatted alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe formatted alter6
+POSTHOOK: type: DESCTABLE
+# col_name            	data_type           	comment             
+	 	 
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	int                 	None                
+	 	 
+# Detailed Table Information	 	 
+Database:           	default             	 
+#### A masked pattern was here ####
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+#### A masked pattern was here ####
+Table Type:         	MANAGED_TABLE       	 
+Table Parameters:	 	 
+#### A masked pattern was here ####
+	 	 
+# Storage Information	 	 
+SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Skewed Columns:     	[a]                 	 
+Skewed Values:      	[[skew_a]]          	 
+Storage Desc Params:	 	 
+	serialization.format	1                   
+PREHOOK: query: alter table default.alter6 not skewed
+PREHOOK: type: ALTERTABLE_SKEWED
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: alter table default.alter6 not skewed
+POSTHOOK: type: ALTERTABLE_SKEWED
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6
+PREHOOK: query: describe formatted alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe formatted alter6
+POSTHOOK: type: DESCTABLE
+# col_name            	data_type           	comment             
+	 	 
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	int                 	None                
+	 	 
+# Detailed Table Information	 	 
+Database:           	default             	 
+#### A masked pattern was here ####
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+#### A masked pattern was here ####
+Table Type:         	MANAGED_TABLE       	 
+Table Parameters:	 	 
+#### A masked pattern was here ####
+	 	 
+# Storage Information	 	 
+SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Storage Desc Params:	 	 
+	serialization.format	1                   
+PREHOOK: query: drop table alter6
+PREHOOK: type: DROPTABLE
+PREHOOK: Input: default@alter6
+PREHOOK: Output: default@alter6
+POSTHOOK: query: drop table alter6
+POSTHOOK: type: DROPTABLE
+POSTHOOK: Input: default@alter6
+POSTHOOK: Output: default@alter6

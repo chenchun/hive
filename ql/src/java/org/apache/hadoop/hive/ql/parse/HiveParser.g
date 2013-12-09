@@ -869,18 +869,18 @@ alterStatement
 alterTableStatementSuffix
 @init { msgs.push("alter table statement"); }
 @after { msgs.pop(); }
-    : alterStatementSuffixRename
-    | alterStatementSuffixAddCol
-    | alterStatementSuffixRenameCol
-    | alterStatementSuffixDropPartitions
-    | alterStatementSuffixAddPartitions
-    | alterStatementSuffixTouch
-    | alterStatementSuffixArchive
-    | alterStatementSuffixUnArchive
-    | alterStatementSuffixProperties
-    | alterTblPartitionStatement
-    | alterStatementSuffixSkewedby
-    | alterStatementSuffixExchangePartition
+    : (alterStatementSuffixRename) => alterStatementSuffixRename
+    | (alterStatementSuffixAddCol) => alterStatementSuffixAddCol
+    | (alterStatementSuffixRenameCol) => alterStatementSuffixRenameCol
+    | (alterStatementSuffixDropPartitions) => alterStatementSuffixDropPartitions
+    | (alterStatementSuffixAddPartitions) => alterStatementSuffixAddPartitions
+    | (alterStatementSuffixTouch) => alterStatementSuffixTouch
+    | (alterStatementSuffixArchive) => alterStatementSuffixArchive
+    | (alterStatementSuffixUnArchive) => alterStatementSuffixUnArchive
+    | (alterStatementSuffixProperties) => alterStatementSuffixProperties
+    | (alterTblPartitionStatement) => alterTblPartitionStatement
+    | (alterStatementSuffixSkewedby) => alterStatementSuffixSkewedby
+    | (alterStatementSuffixExchangePartition) => alterStatementSuffixExchangePartition
     ;
 
 alterViewStatementSuffix
@@ -929,23 +929,23 @@ alterDatabaseSuffixProperties
 alterStatementSuffixRename
 @init { msgs.push("rename statement"); }
 @after { msgs.pop(); }
-    : oldName=identifier KW_RENAME KW_TO newName=identifier
+    : oldName=tableName KW_RENAME KW_TO newName=identifier
     -> ^(TOK_ALTERTABLE_RENAME $oldName $newName)
     ;
 
 alterStatementSuffixAddCol
 @init { msgs.push("add column statement"); }
 @after { msgs.pop(); }
-    : identifier (add=KW_ADD | replace=KW_REPLACE) KW_COLUMNS LPAREN columnNameTypeList RPAREN
-    -> {$add != null}? ^(TOK_ALTERTABLE_ADDCOLS identifier columnNameTypeList)
-    ->                 ^(TOK_ALTERTABLE_REPLACECOLS identifier columnNameTypeList)
+    : tabName=tableName (add=KW_ADD | replace=KW_REPLACE) KW_COLUMNS LPAREN columnNameTypeList RPAREN
+    -> {$add != null}? ^(TOK_ALTERTABLE_ADDCOLS $tabName columnNameTypeList)
+    ->                 ^(TOK_ALTERTABLE_REPLACECOLS $tabName columnNameTypeList)
     ;
 
 alterStatementSuffixRenameCol
 @init { msgs.push("rename column name"); }
 @after { msgs.pop(); }
-    : identifier KW_CHANGE KW_COLUMN? oldName=identifier newName=identifier colType (KW_COMMENT comment=StringLiteral)? alterStatementChangeColPosition?
-    ->^(TOK_ALTERTABLE_RENAMECOL identifier $oldName $newName colType $comment? alterStatementChangeColPosition?)
+    : tabName=tableName KW_CHANGE KW_COLUMN? oldName=identifier newName=identifier colType (KW_COMMENT comment=StringLiteral)? alterStatementChangeColPosition?
+    ->^(TOK_ALTERTABLE_RENAMECOL $tabName $oldName $newName colType $comment? alterStatementChangeColPosition?)
     ;
 
 alterStatementChangeColPosition
@@ -957,8 +957,8 @@ alterStatementChangeColPosition
 alterStatementSuffixAddPartitions
 @init { msgs.push("add partition statement"); }
 @after { msgs.pop(); }
-    : identifier KW_ADD ifNotExists? alterStatementSuffixAddPartitionsElement+
-    -> ^(TOK_ALTERTABLE_ADDPARTS identifier ifNotExists? alterStatementSuffixAddPartitionsElement+)
+    : tabName=tableName KW_ADD ifNotExists? alterStatementSuffixAddPartitionsElement+
+    -> ^(TOK_ALTERTABLE_ADDPARTS $tabName ifNotExists? alterStatementSuffixAddPartitionsElement+)
     ;
 
 alterStatementSuffixAddPartitionsElement
@@ -968,22 +968,22 @@ alterStatementSuffixAddPartitionsElement
 alterStatementSuffixTouch
 @init { msgs.push("touch statement"); }
 @after { msgs.pop(); }
-    : identifier KW_TOUCH (partitionSpec)*
-    -> ^(TOK_ALTERTABLE_TOUCH identifier (partitionSpec)*)
+    : tabName=tableName KW_TOUCH (partitionSpec)*
+    -> ^(TOK_ALTERTABLE_TOUCH $tabName (partitionSpec)*)
     ;
 
 alterStatementSuffixArchive
 @init { msgs.push("archive statement"); }
 @after { msgs.pop(); }
-    : identifier KW_ARCHIVE (partitionSpec)*
-    -> ^(TOK_ALTERTABLE_ARCHIVE identifier (partitionSpec)*)
+    : tabName=tableName KW_ARCHIVE (partitionSpec)*
+    -> ^(TOK_ALTERTABLE_ARCHIVE $tabName (partitionSpec)*)
     ;
 
 alterStatementSuffixUnArchive
 @init { msgs.push("unarchive statement"); }
 @after { msgs.pop(); }
-    : identifier KW_UNARCHIVE (partitionSpec)*
-    -> ^(TOK_ALTERTABLE_UNARCHIVE identifier (partitionSpec)*)
+    : tabName=tableName KW_UNARCHIVE (partitionSpec)*
+    -> ^(TOK_ALTERTABLE_UNARCHIVE $tabName (partitionSpec)*)
     ;
 
 partitionLocation
@@ -996,16 +996,16 @@ partitionLocation
 alterStatementSuffixDropPartitions
 @init { msgs.push("drop partition statement"); }
 @after { msgs.pop(); }
-    : identifier KW_DROP ifExists? dropPartitionSpec (COMMA dropPartitionSpec)* ignoreProtection?
-    -> ^(TOK_ALTERTABLE_DROPPARTS identifier dropPartitionSpec+ ifExists? ignoreProtection?)
+    : tabName=tableName KW_DROP ifExists? dropPartitionSpec (COMMA dropPartitionSpec)* ignoreProtection?
+    -> ^(TOK_ALTERTABLE_DROPPARTS $tabName dropPartitionSpec+ ifExists? ignoreProtection?)
     ;
 
 alterStatementSuffixProperties
 @init { msgs.push("alter properties statement"); }
 @after { msgs.pop(); }
-    : name=identifier KW_SET KW_TBLPROPERTIES tableProperties
+    : (tableName KW_SET KW_TBLPROPERTIES tableProperties) => name=tableName KW_SET KW_TBLPROPERTIES tableProperties
     -> ^(TOK_ALTERTABLE_PROPERTIES $name tableProperties)
-    | name=identifier KW_UNSET KW_TBLPROPERTIES ifExists? tableProperties
+    | name=tableName KW_UNSET KW_TBLPROPERTIES ifExists? tableProperties
     -> ^(TOK_DROPTABLE_PROPERTIES $name tableProperties ifExists?)
     ;
 
@@ -1030,17 +1030,17 @@ alterStatementSuffixSerdeProperties
 tablePartitionPrefix
 @init {msgs.push("table partition prefix");}
 @after {msgs.pop();}
-  :name=identifier partitionSpec?
+  :name=tableName partitionSpec?
   ->^(TOK_TABLE_PARTITION $name partitionSpec?)
   ;
 
 alterTblPartitionStatement
 @init {msgs.push("alter table partition statement");}
 @after {msgs.pop();}
-  : tablePartitionPrefix alterTblPartitionStatementSuffix
+  : (tablePartitionPrefix alterTblPartitionStatementSuffix) => tablePartitionPrefix alterTblPartitionStatementSuffix
   -> ^(TOK_ALTERTABLE_PARTITION tablePartitionPrefix alterTblPartitionStatementSuffix)
-  |Identifier KW_PARTITION KW_COLUMN LPAREN columnNameType RPAREN
-  -> ^(TOK_ALTERTABLE_ALTERPARTS Identifier columnNameType)
+  |name=tableName KW_PARTITION KW_COLUMN LPAREN columnNameType RPAREN
+  -> ^(TOK_ALTERTABLE_ALTERPARTS $name columnNameType)
   ;
 
 alterTblPartitionStatementSuffix
@@ -1111,14 +1111,10 @@ alterStatementSuffixLocation
 alterStatementSuffixSkewedby
 @init {msgs.push("alter skewed by statement");}
 @after{msgs.pop();}
-	:name=identifier tableSkewed
-	->^(TOK_ALTERTABLE_SKEWED $name tableSkewed)
-	|
-	name=identifier KW_NOT KW_SKEWED
-	->^(TOK_ALTERTABLE_SKEWED $name)
-	|
-	name=identifier KW_NOT storedAsDirs
-	->^(TOK_ALTERTABLE_SKEWED $name storedAsDirs)
+	: name=tableName (tableSkewed | not=KW_NOT (notSkewed=KW_SKEWED | storedAsDirs))
+	->{$not == null}? ^(TOK_ALTERTABLE_SKEWED $name tableSkewed)
+	->{$notSkewed != null}? ^(TOK_ALTERTABLE_SKEWED $name)
+	->                      ^(TOK_ALTERTABLE_SKEWED $name storedAsDirs)
 	;
 
 alterStatementSuffixExchangePartition
