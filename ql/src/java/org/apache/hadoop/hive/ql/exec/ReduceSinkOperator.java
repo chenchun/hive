@@ -279,7 +279,7 @@ public class ReduceSinkOperator extends TerminalOperator<ReduceSinkDesc>
         populateCachedDistinctKeys(row, i);
         HiveKey hiveKey = toHiveKey(cachedKeys[i], tag, distKeyLength);
         hiveKey.setHashCode(hashCode);
-        collect(hiveKey, value);
+        collect(hiveKey, new BytesWritable());
       }
     } catch (HiveException e) {
       throw e;
