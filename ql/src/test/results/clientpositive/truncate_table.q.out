@@ -73,7 +73,7 @@ POSTHOOK: query: -- truncate non-partitioned table
 explain TRUNCATE TABLE src_truncate
 POSTHOOK: type: TRUNCATETABLE
 ABSTRACT SYNTAX TREE:
-  (TOK_TRUNCATETABLE (TOK_TABLE_PARTITION src_truncate))
+  (TOK_TRUNCATETABLE (TOK_TABLE_PARTITION (TOK_TABNAME src_truncate)))
 
 STAGE DEPENDENCIES:
   Stage-0 is a root stage
@@ -106,7 +106,7 @@ POSTHOOK: query: -- truncate a partition
 explain TRUNCATE TABLE srcpart_truncate partition (ds='2008-04-08', hr='11')
 POSTHOOK: type: TRUNCATETABLE
 ABSTRACT SYNTAX TREE:
-  (TOK_TRUNCATETABLE (TOK_TABLE_PARTITION srcpart_truncate (TOK_PARTSPEC (TOK_PARTVAL ds '2008-04-08') (TOK_PARTVAL hr '11'))))
+  (TOK_TRUNCATETABLE (TOK_TABLE_PARTITION (TOK_TABNAME srcpart_truncate) (TOK_PARTSPEC (TOK_PARTVAL ds '2008-04-08') (TOK_PARTVAL hr '11'))))
 
 STAGE DEPENDENCIES:
   Stage-0 is a root stage
@@ -144,7 +144,7 @@ POSTHOOK: query: -- truncate partitions with partial spec
 explain TRUNCATE TABLE srcpart_truncate partition (ds, hr='12')
 POSTHOOK: type: TRUNCATETABLE
 ABSTRACT SYNTAX TREE:
-  (TOK_TRUNCATETABLE (TOK_TABLE_PARTITION srcpart_truncate (TOK_PARTSPEC (TOK_PARTVAL ds) (TOK_PARTVAL hr '12'))))
+  (TOK_TRUNCATETABLE (TOK_TABLE_PARTITION (TOK_TABNAME srcpart_truncate) (TOK_PARTSPEC (TOK_PARTVAL ds) (TOK_PARTVAL hr '12'))))
 
 STAGE DEPENDENCIES:
   Stage-0 is a root stage
@@ -186,7 +186,7 @@ POSTHOOK: query: -- truncate partitioned table
 explain TRUNCATE TABLE srcpart_truncate
 POSTHOOK: type: TRUNCATETABLE
 ABSTRACT SYNTAX TREE:
-  (TOK_TRUNCATETABLE (TOK_TABLE_PARTITION srcpart_truncate))
+  (TOK_TRUNCATETABLE (TOK_TABLE_PARTITION (TOK_TABNAME srcpart_truncate)))
 
 STAGE DEPENDENCIES:
   Stage-0 is a root stage
