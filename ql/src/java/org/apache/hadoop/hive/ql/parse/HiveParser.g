@@ -886,9 +886,9 @@ alterTableStatementSuffix
     | partition=KW_PARTITION KW_COLUMN LPAREN columnNameType RPAREN
     | partitionSpec? alterTblPartitionStatementSuffix
     )
-    -> {$rename != null} ^(TOK_ALTERTABLE_RENAME $tabName $newName)
+    -> {$rename != null}? ^(TOK_ALTERTABLE_RENAME $tabName $newName)
     -> {$add != null && $col != null}? ^(TOK_ALTERTABLE_ADDCOLS $tabName columnNameTypeList)
-    -> {$replace != null}? ^(TOK_ALTERTABLE_REPLACECOLS $tabName columnNameTypeList))
+    -> {$replace != null}? ^(TOK_ALTERTABLE_REPLACECOLS $tabName columnNameTypeList)
     -> {$change != null}? ^(TOK_ALTERTABLE_RENAMECOL $tabName $oldName $newName colType $comment? alterStatementChangeColPosition?)
     -> {$drop != null}? ^(TOK_ALTERTABLE_DROPPARTS $tabName dropPartitionSpec+ ifExists? ignoreProtection?)
     -> {$add != null}? ^(TOK_ALTERTABLE_ADDPARTS $tabName ifNotExists? alterStatementSuffixAddPartitionsElement+)
@@ -903,6 +903,7 @@ alterTableStatementSuffix
     -> {$exchange != null}? ^(TOK_EXCHANGEPARTITION $tabName partitionSpec $exchangename)
     -> {$partition != null}? ^(TOK_ALTERTABLE_ALTERPARTS $tabName columnNameType)
     -> ^(TOK_ALTERTABLE_PARTITION ^(TOK_TABLE_PARTITION $tabName partitionSpec?) alterTblPartitionStatementSuffix)
+    ;
 
 alterViewStatementSuffix
 @init { msgs.push("alter view statement"); }
