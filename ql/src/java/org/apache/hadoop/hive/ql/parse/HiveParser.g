@@ -1454,7 +1454,7 @@ tableSkewed returns [Boolean isSkewed]
 @init { msgs.push("table skewed specification"); }
 @after { msgs.pop(); }
     :
-     KW_SKEWED {$isSkew = input.LT(1).getText().equalsIgnoreCase("skewed");} KW_BY LPAREN skewedCols=columnNameList RPAREN KW_ON LPAREN (skewedValues=skewedValueElement) RPAREN (storedAsDirs)?
+     KW_SKEWED {$isSkewed = input.LT(1).getText().equalsIgnoreCase("skewed");} KW_BY LPAREN skewedCols=columnNameList RPAREN KW_ON LPAREN (skewedValues=skewedValueElement) RPAREN (storedAsDirs)?
     -> ^(TOK_TABLESKEWED $skewedCols $skewedValues storedAsDirs?)
     ;
 
