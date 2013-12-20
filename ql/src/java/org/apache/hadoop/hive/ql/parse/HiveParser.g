@@ -870,21 +870,36 @@ alterTableStatementSuffix
 @init { msgs.push("alter table statement"); }
 @after { msgs.pop(); }
     : tabName=tableName
-    ( rename=KW_RENAME KW_TO newName=identifier
-    | (add=KW_ADD | replace=KW_REPLACE) col=KW_COLUMNS LPAREN columnNameTypeList RPAREN
-    | change=KW_CHANGE KW_COLUMN? oldName=identifier newName=identifier colType (KW_COMMENT comment=StringLiteral)? alterStatementChangeColPosition?
-    | drop=KW_DROP ifExists? dropPartitionSpec (COMMA dropPartitionSpec)* ignoreProtection?
-    | add=KW_ADD ifNotExists? alterStatementSuffixAddPartitionsElement+
-    | touch=KW_TOUCH (partitionSpec)*
-    | archive=KW_ARCHIVE (partitionSpec)*
-    | unarchive=KW_UNARCHIVE (partitionSpec)*
-    | set=KW_SET KW_TBLPROPERTIES tableProperties
-    | unset=KW_UNSET KW_TBLPROPERTIES ifExists? tableProperties
-    | tableSkewed
-    | not=KW_NOT (skewed=KW_SKEWED | storedAsDirs)
-    | exchange=KW_EXCHANGE partitionSpec KW_WITH KW_TABLE exchangename=tableName
-    | partition=KW_PARTITION KW_COLUMN LPAREN columnNameType RPAREN
-    | partitionSpec? alterTblPartitionStatementSuffix
+    (
+        rename=KW_RENAME KW_TO newName=identifier
+    |
+        (add=KW_ADD | replace=KW_REPLACE) col=KW_COLUMNS LPAREN columnNameTypeList RPAREN
+    |
+        change=KW_CHANGE KW_COLUMN? oldName=identifier newName=identifier colType (KW_COMMENT comment=StringLiteral)? alterStatementChangeColPosition?
+    |
+        drop=KW_DROP ifExists? dropPartitionSpec (COMMA dropPartitionSpec)* ignoreProtection?
+    |
+        add=KW_ADD ifNotExists? alterStatementSuffixAddPartitionsElement+
+    |
+        touch=KW_TOUCH (partitionSpec)*
+    |
+        archive=KW_ARCHIVE (partitionSpec)*
+    |
+        unarchive=KW_UNARCHIVE (partitionSpec)*
+    |
+        set=KW_SET KW_TBLPROPERTIES tableProperties
+    |
+        unset=KW_UNSET KW_TBLPROPERTIES ifExists? tableProperties
+    |
+        tblSkewed=tableSkewed
+    |
+        not=KW_NOT (skewed=KW_SKEWED | storedAsDirs)
+    |
+        exchange=KW_EXCHANGE partitionSpec KW_WITH KW_TABLE exchangename=tableName
+    |
+        partition=KW_PARTITION KW_COLUMN LPAREN columnNameType RPAREN
+    |
+        partitionSpec? alterTblPartitionStatementSuffix
     )
     -> {$rename != null}? ^(TOK_ALTERTABLE_RENAME $tabName $newName)
     -> {$add != null && $col != null}? ^(TOK_ALTERTABLE_ADDCOLS $tabName columnNameTypeList)
@@ -897,7 +912,7 @@ alterTableStatementSuffix
     -> {$unarchive != null}? ^(TOK_ALTERTABLE_UNARCHIVE $tabName (partitionSpec)*)
     -> {$set != null}? ^(TOK_ALTERTABLE_PROPERTIES $tabName tableProperties)
     -> {$unset != null}? ^(TOK_DROPTABLE_PROPERTIES $tabName tableProperties ifExists?)
-    -> {input.LT(1).getText().equalsIgnoreCase("skewed")}? ^(TOK_ALTERTABLE_SKEWED $tabName tableSkewed)
+    -> {$tblSkewed.isSkewed != null}? ^(TOK_ALTERTABLE_SKEWED $tabName tableSkewed)
     -> {$not != null && $skewed != null}? ^(TOK_ALTERTABLE_SKEWED $tabName)
     -> {$not != null}? ^(TOK_ALTERTABLE_SKEWED $tabName storedAsDirs)
     -> {$exchange != null}? ^(TOK_EXCHANGEPARTITION $tabName partitionSpec $exchangename)
@@ -1435,11 +1450,11 @@ tableBuckets
     -> ^(TOK_TABLEBUCKETS $bucketCols $sortCols? $num)
     ;
 
-tableSkewed
+tableSkewed returns [Boolean isSkewed]
 @init { msgs.push("table skewed specification"); }
 @after { msgs.pop(); }
     :
-     KW_SKEWED KW_BY LPAREN skewedCols=columnNameList RPAREN KW_ON LPAREN (skewedValues=skewedValueElement) RPAREN (storedAsDirs)?
+     KW_SKEWED {$isSkew = input.LT(1).getText().equalsIgnoreCase("skewed");} KW_BY LPAREN skewedCols=columnNameList RPAREN KW_ON LPAREN (skewedValues=skewedValueElement) RPAREN (storedAsDirs)?
     -> ^(TOK_TABLESKEWED $skewedCols $skewedValues storedAsDirs?)
     ;
 
