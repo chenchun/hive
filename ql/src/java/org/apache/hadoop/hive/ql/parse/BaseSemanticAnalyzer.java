@@ -1282,8 +1282,7 @@ public abstract class BaseSemanticAnalyzer {
   }
 
   protected Table getTable(String tblName, boolean throwException) throws SemanticException {
-    String currentDb = SessionState.get().getCurrentDatabase();
-    return getTable(currentDb, tblName, throwException);
+    return getTable(null, tblName, throwException);
   }
 
   // qnName : possibly contains database name (dot seperated)

@@ -2570,7 +2570,7 @@ private void constructOneLBLocationMap(FileStatus fSta,
     }
   }
 
-  private static String[] getQualifiedNames(String qualifiedName) {
+  public static String[] getQualifiedNames(String qualifiedName) {
     return qualifiedName.split("\\.");
   }
 
