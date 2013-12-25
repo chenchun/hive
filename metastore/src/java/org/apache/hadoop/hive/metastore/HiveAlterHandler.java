@@ -232,6 +232,10 @@ public class HiveAlterHandler implements AlterHandler {
             }
           }
         }
+        if (!renameSuccess) {
+          throw new InvalidOperationException("Renaming hdfs path failed. src path is " + srcPath
+              + ", dest Path is " + destPath);
+        }
       }
     }
     if (!success) {
